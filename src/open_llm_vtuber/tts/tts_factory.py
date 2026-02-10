@@ -1,10 +1,10 @@
-from typing import Type
+# pyright: reportArgumentType=false
 from .tts_interface import TTSInterface
 
 
 class TTSFactory:
     @staticmethod
-    def get_tts_engine(engine_type, **kwargs) -> Type[TTSInterface]:
+    def get_tts_engine(engine_type, **kwargs) -> TTSInterface:
         if engine_type == "azure_tts":
             from .azure_tts import TTSEngine as AzureTTSEngine
 
@@ -153,6 +153,22 @@ class TTSFactory:
                 file_extension=kwargs.get(
                     "file_extension"
                 ),  # Will use default "mp3" if not in kwargs
+            )
+
+        elif engine_type == "qwen3_tts":
+            from .qwen3_tts import TTSEngine as Qwen3TTSEngine
+
+            return Qwen3TTSEngine(
+                base_url=kwargs.get("base_url"),
+                endpoint=kwargs.get("endpoint"),
+                model_name=kwargs.get("model_name"),
+                language=kwargs.get("language"),
+                voice=kwargs.get("voice"),
+                timeout=kwargs.get("timeout", 30.0),
+                max_retries=kwargs.get("max_retries", 2),
+                fallback_model=kwargs.get("fallback_model"),
+                output_format=kwargs.get("output_format", "wav"),
+                file_extension=kwargs.get("file_extension", "wav"),
             )
 
         elif engine_type == "spark_tts":

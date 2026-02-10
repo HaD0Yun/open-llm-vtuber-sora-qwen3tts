@@ -101,6 +101,8 @@ The reason it's called `Open-LLM-Vtuber` instead of `Open-LLM-Companion` or `Ope
 
 Please refer to the [Quick Start](https://open-llm-vtuber.github.io/docs/quick-start) section in our documentation for installation.
 
+For a local stack using cliproxy + Qwen3-TTS + Sora persona, see `doc/SORA_QWEN3TTS_QUICKSTART.md`.
+
 
 
 ## ☝ Update
@@ -151,7 +153,6 @@ Thanks our contributors and maintainers for making this project possible.
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=Open-LLM-VTuber/open-llm-vtuber&type=Date)](https://star-history.com/#Open-LLM-VTuber/open-llm-vtuber&Date)
-
 
 
 

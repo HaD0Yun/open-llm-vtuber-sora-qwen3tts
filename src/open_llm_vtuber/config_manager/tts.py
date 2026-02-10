@@ -481,6 +481,64 @@ class OpenAITTSConfig(I18nMixin):
     }
 
 
+class Qwen3TTSConfig(I18nMixin):
+    """Configuration for Qwen3 TTS self-hosted service."""
+
+    base_url: str = Field("http://127.0.0.1:8000", alias="base_url")
+    endpoint: str = Field("/v1/audio/speech", alias="endpoint")
+    model_name: str = Field(..., alias="model_name")
+    language: str = Field("zh", alias="language")
+    voice: Optional[str] = Field(None, alias="voice")
+    timeout: float = Field(30.0, alias="timeout")
+    max_retries: int = Field(2, alias="max_retries")
+    fallback_model: Optional[str] = Field(None, alias="fallback_model")
+    output_format: Literal["wav", "mp3", "pcm"] = Field("wav", alias="output_format")
+    file_extension: Literal["wav", "mp3", "pcm"] = Field("wav", alias="file_extension")
+
+    DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
+        "base_url": Description(
+            en="Base URL of the self-hosted Qwen3 TTS service",
+            zh="自托管 Qwen3 TTS 服务的基础 URL",
+        ),
+        "endpoint": Description(
+            en="Path of the Qwen3 TTS generation endpoint",
+            zh="Qwen3 TTS 生成接口路径",
+        ),
+        "model_name": Description(
+            en="Model ID/name used by the Qwen3 TTS backend",
+            zh="Qwen3 TTS 后端使用的模型 ID/名称",
+        ),
+        "language": Description(
+            en="Language code for synthesis (e.g., zh, en)",
+            zh="合成语言代码（如 zh、en）",
+        ),
+        "voice": Description(
+            en="Optional speaker/voice preset for synthesis",
+            zh="可选的说话人/音色预设",
+        ),
+        "timeout": Description(
+            en="Request timeout in seconds",
+            zh="请求超时时间（秒）",
+        ),
+        "max_retries": Description(
+            en="Maximum retry attempts for failed requests",
+            zh="失败请求的最大重试次数",
+        ),
+        "fallback_model": Description(
+            en="Fallback model name if primary model fails",
+            zh="主模型失败时使用的回退模型名称",
+        ),
+        "output_format": Description(
+            en="Output audio format returned by Qwen3 TTS",
+            zh="Qwen3 TTS 返回的输出音频格式",
+        ),
+        "file_extension": Description(
+            en="Output file extension used when saving audio",
+            zh="保存音频时使用的文件扩展名",
+        ),
+    }
+
+
 class SparkTTSConfig(I18nMixin):
     """Configuration for Spark TTS."""
 
@@ -697,6 +755,7 @@ class TTSConfig(I18nMixin):
         "sherpa_onnx_tts",
         "siliconflow_tts",
         "openai_tts",  # Add openai_tts here
+        "qwen3_tts",
         "spark_tts",
         "minimax_tts",
         "elevenlabs_tts",
@@ -721,6 +780,7 @@ class TTSConfig(I18nMixin):
         None, alias="siliconflow_tts"
     )
     openai_tts: Optional[OpenAITTSConfig] = Field(None, alias="openai_tts")
+    qwen3_tts: Optional[Qwen3TTSConfig] = Field(None, alias="qwen3_tts")
     spark_tts: Optional[SparkTTSConfig] = Field(None, alias="spark_tts")
     minimax_tts: Optional[MinimaxTTSConfig] = Field(None, alias="minimax_tts")
     elevenlabs_tts: ElevenLabsTTSConfig | None = Field(None, alias="elevenlabs_tts")
@@ -757,6 +817,9 @@ class TTSConfig(I18nMixin):
         ),
         "openai_tts": Description(
             en="Configuration for OpenAI-compatible TTS", zh="OpenAI 兼容 TTS 配置"
+        ),
+        "qwen3_tts": Description(
+            en="Configuration for Qwen3 self-hosted TTS", zh="Qwen3 自托管 TTS 配置"
         ),
         "spark_tts": Description(en="Configuration for Spark TTS", zh="Spark TTS 配置"),
         "minimax_tts": Description(
@@ -802,6 +865,8 @@ class TTSConfig(I18nMixin):
             values.siliconflow_tts.model_validate(values.siliconflow_tts.model_dump())
         elif tts_model == "openai_tts" and values.openai_tts is not None:
             values.openai_tts.model_validate(values.openai_tts.model_dump())
+        elif tts_model == "qwen3_tts" and values.qwen3_tts is not None:
+            values.qwen3_tts.model_validate(values.qwen3_tts.model_dump())
         elif tts_model == "spark_tts" and values.spark_tts is not None:
             values.spark_tts.model_validate(values.spark_tts.model_dump())
         elif tts_model == "minimax_tts" and values.minimax_tts is not None:

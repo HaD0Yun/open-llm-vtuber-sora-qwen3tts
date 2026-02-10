@@ -26,5 +26,33 @@
                 "": 1
             }
         }
+    },
+    {
+        "name": "march7",
+        "description": "March 7th",
+        "url": "/live2d-models/march7/runtime/march7.model3.json",
+        "kScale": 0.5,
+        "initialXshift": 0,
+        "initialYshift": 0,
+        "kXOffset": 1150,
+        "idleMotionGroupName": "Idle",
+        "emotionMap": {
+            "neutral": 0,
+            "anger": 4,
+            "disgust": 6,
+            "fear": 6,
+            "joy": 1,
+            "smirk": 3,
+            "sadness": 5,
+            "surprise": 7
+        },
+        "tapMotions": {
+            "HitAreaHead": {
+                "": 1
+            },
+            "HitAreaBody": {
+                "": 1
+            }
+        }
     }
 ]
