@@ -48,7 +48,7 @@ def main() -> None:
     llm_cfg = character["agent_config"]["llm_configs"]["openai_compatible_llm"]
     llm_cfg["base_url"] = os.getenv("CLIPROXY_BASE_URL", "http://localhost:8317/v1")
     llm_cfg["llm_api_key"] = os.getenv("CLIPROXY_API_KEY", "YOUR_CLIPROXY_API_KEY")
-    llm_cfg["model"] = os.getenv("CLIPROXY_MODEL", "gemini-3-flash-preview")
+    llm_cfg["model"] = os.getenv("CLIPROXY_MODEL", "gpt-5.1-codex-mini")
 
     tts_conf = character["tts_config"]
     tts_conf["tts_model"] = "qwen3_tts"

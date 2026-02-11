@@ -30,7 +30,7 @@ If March7 is not imported, the setup still works with available model defaults.
 ```bash
 export CLIPROXY_BASE_URL="http://localhost:8317/v1"
 export CLIPROXY_API_KEY="YOUR_CLIPROXY_API_KEY"
-export CLIPROXY_MODEL="gemini-3-flash-preview"
+export CLIPROXY_MODEL="gpt-5.1-codex-mini"
 
 export QWEN_TTS_BASE_URL="http://127.0.0.1:18117"
 export QWEN_TTS_LANGUAGE="english"
@@ -42,6 +42,12 @@ export QWEN_TTS_VOICE="sohee"
 ```bash
 bash scripts/start_sora_stack.sh
 ```
+
+`start_sora_stack.sh` will automatically:
+- install a persistent `qwen-tts` runtime via `uv tool install qwen-tts` (first run only)
+- install `flash-attn` into that runtime
+- start Qwen3-TTS bridge with `--enable-flash-attn`
+- start Open-LLM-VTuber server
 
 Open:
 
