@@ -169,6 +169,7 @@ class TTSFactory:
                 fallback_model=kwargs.get("fallback_model"),
                 output_format=kwargs.get("output_format", "wav"),
                 file_extension=kwargs.get("file_extension", "wav"),
+                style_intensity=kwargs.get("style_intensity", 1.8),
             )
 
         elif engine_type == "spark_tts":

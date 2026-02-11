@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import importlib
 import json
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -7,7 +8,6 @@ from io import BytesIO
 
 import soundfile as sf
 import torch
-from qwen_tts import Qwen3TTSModel
 
 
 def parse_args() -> argparse.Namespace:
@@ -40,6 +40,11 @@ def parse_args() -> argparse.Namespace:
         default="sohee",
         help="Fallback speaker when request has no voice",
     )
+    parser.add_argument(
+        "--enable-flash-attn",
+        action="store_true",
+        help="Try flash_attention_2 for faster generation when available",
+    )
     return parser.parse_args()
 
 
@@ -54,12 +59,33 @@ def resolve_dtype(dtype_name: str) -> torch.dtype:
 def main() -> None:
     args = parse_args()
     dtype = resolve_dtype(args.dtype)
+    qwen_tts = importlib.import_module("qwen_tts")
+    qwen3_tts_model_cls = getattr(qwen_tts, "Qwen3TTSModel")
 
-    model = Qwen3TTSModel.from_pretrained(
-        args.model,
-        device_map=args.device,
-        dtype=dtype,
-    )
+    model_kwargs = {
+        "device_map": args.device,
+        "dtype": dtype,
+    }
+
+    if args.enable_flash_attn:
+        model_kwargs["attn_implementation"] = "flash_attention_2"
+
+    try:
+        model = qwen3_tts_model_cls.from_pretrained(
+            args.model,
+            **model_kwargs,
+        )
+        if args.enable_flash_attn:
+            print("FlashAttention enabled: flash_attention_2")
+    except Exception as exc:
+        if not args.enable_flash_attn:
+            raise
+        print(f"FlashAttention unavailable, falling back to default attention: {exc}")
+        model = qwen3_tts_model_cls.from_pretrained(
+            args.model,
+            device_map=args.device,
+            dtype=dtype,
+        )
 
     class Handler(BaseHTTPRequestHandler):
         def do_POST(self) -> None:
@@ -77,11 +103,13 @@ def main() -> None:
                 text = body.get("text") or body.get("input") or ""
                 speaker = body.get("voice") or args.default_voice
                 language = body.get("language") or args.default_language
+                instruct = body.get("instruct")
 
                 wavs, sr = model.generate_custom_voice(
                     text=text,
                     speaker=speaker,
                     language=language,
+                    instruct=instruct,
                 )
 
                 buffer = BytesIO()
@@ -101,7 +129,7 @@ def main() -> None:
                 self.end_headers()
                 self.wfile.write(message)
 
-        def log_message(self, *_: object) -> None:
+        def log_message(self, format: str, *args: object) -> None:
             return
 
     server = ThreadingHTTPServer((args.host, args.port), Handler)

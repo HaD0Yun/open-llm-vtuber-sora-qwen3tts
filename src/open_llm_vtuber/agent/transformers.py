@@ -1,5 +1,6 @@
-from typing import AsyncIterator, Tuple, Callable, List, Union, Dict, Any
+from typing import AsyncIterator, Tuple, Callable, List, Union, Dict, Any, Optional
 from functools import wraps
+import re
 from .output_types import Actions, SentenceOutput, DisplayText
 from ..utils.tts_preprocessor import tts_filter as filter_text
 from ..live2d_model import Live2dModel
@@ -12,7 +13,7 @@ from loguru import logger
 def sentence_divider(
     faster_first_response: bool = True,
     segment_method: str = "pysbd",
-    valid_tags: List[str] = None,
+    valid_tags: Optional[List[str]] = None,
 ):
     """
     Decorator that transforms token stream into sentences with tags
@@ -155,7 +156,7 @@ def display_processor():
 
 
 def tts_filter(
-    tts_preprocessor_config: TTSPreprocessorConfig = None,
+    tts_preprocessor_config: Optional[TTSPreprocessorConfig] = None,
 ):
     """
     Decorator that filters text for TTS, passing through dicts.
@@ -177,7 +178,7 @@ def tts_filter(
             *args, **kwargs
         ) -> AsyncIterator[Union[SentenceOutput, Dict[str, Any]]]:  # Yield type hint
             stream = func(*args, **kwargs)
-            config = tts_preprocessor_config or TTSPreprocessorConfig()
+            config = tts_preprocessor_config
 
             async for item in stream:
                 if (
@@ -186,17 +187,35 @@ def tts_filter(
                     and isinstance(item[1], DisplayText)
                 ):
                     sentence, display, actions = item
+                    emotion_tags = re.findall(
+                        r"\[([A-Za-z_][A-Za-z0-9_]*)\]", sentence.text
+                    )
                     if any(tag.name == "think" for tag in sentence.tags):
                         tts = ""
                     else:
                         tts = filter_text(
                             text=display.text,
-                            remove_special_char=config.remove_special_char,
-                            ignore_brackets=config.ignore_brackets,
-                            ignore_parentheses=config.ignore_parentheses,
-                            ignore_asterisks=config.ignore_asterisks,
-                            ignore_angle_brackets=config.ignore_angle_brackets,
+                            remove_special_char=(
+                                config.remove_special_char if config else True
+                            ),
+                            ignore_brackets=(
+                                config.ignore_brackets if config else True
+                            ),
+                            ignore_parentheses=(
+                                config.ignore_parentheses if config else True
+                            ),
+                            ignore_asterisks=(
+                                config.ignore_asterisks if config else True
+                            ),
+                            ignore_angle_brackets=(
+                                config.ignore_angle_brackets if config else True
+                            ),
                         )
+                        if emotion_tags and tts:
+                            marker_prefix = " ".join(
+                                [f"<<emo:{tag.lower()}>>" for tag in emotion_tags]
+                            )
+                            tts = f"{marker_prefix} {tts}"
 
                     logger.debug(f"[{display.name}] display: {display.text}")
                     logger.debug(f"[{display.name}] tts: {tts}")
