@@ -105,6 +105,7 @@ class TTSEngine(TTSInterface):
     }
 
     _STYLE_TO_INSTRUCT: dict[str, str] = {
+        "interjection_soft": "When interjections or onomatopoeia appear, slightly slow the local pace and insert a brief micro-pause of around 0.2 seconds right after them before continuing.",
         "comfort": "Use a gentle, comforting tone with warm softness and steady reassuring pacing.",
         "apology": "Use a sincere apologetic tone with softened stress and careful pacing.",
         "celebration": "Use festive excitement with lively rhythm, brighter pitch movement, and crisp energy.",
@@ -123,6 +124,10 @@ class TTSEngine(TTSInterface):
     }
 
     _STYLE_RULES: list[tuple[str, str]] = [
+        (
+            "interjection_soft",
+            r"\b(aww|oops|hehe|hmm|oh|ah|wow|whoa|yum|uh)\b|앗|아앗|아|어|어머|헉|허억|오|와|우와|에구|음|흠|헤헤|히히|냠냠|두근두근|쿵|퐁|뿅",
+        ),
         ("apology", r"\b(sorry|apolog|my bad|forgive me)\b|미안|죄송|잘못했"),
         ("gratitude", r"\b(thanks|thank you|appreciate)\b|고마워|감사"),
         (
@@ -175,7 +180,11 @@ class TTSEngine(TTSInterface):
 
         exclamation_count = text.count("!") + text.count("！")
         question_count = text.count("?") + text.count("？")
-        if exclamation_count >= 2 and "urgency" not in styles:
+        if (
+            exclamation_count >= 2
+            and "urgency" not in styles
+            and "interjection_soft" not in styles
+        ):
             styles.append("urgency")
         if question_count >= 1 and "curious" not in styles:
             styles.append("curious")
@@ -194,11 +203,24 @@ class TTSEngine(TTSInterface):
         return "Intensity mode NORMAL: maintain expressive but controlled emotional coloring."
 
     def _amplify_instruction(self, instruction: str) -> str:
+        if "0.2 seconds" in instruction:
+            return instruction
         if self.style_intensity >= 1.8:
             return f"{instruction} Push the emotional coloration further and avoid flat delivery."
         if self.style_intensity >= 1.4:
             return f"{instruction} Keep emotional emphasis clearly audible."
         return instruction
+
+    def _inject_micro_pause_after_interjections(self, text: str) -> str:
+        token_pattern = (
+            r"(aww|oops|hehe|hmm|oh|ah|wow|whoa|yum|uh|앗|아앗|어머|헉|허억|우와|"
+            r"에구|헤헤|히히|냠냠|두근두근|뿅|아|어|오|와|음|흠)"
+        )
+        pattern = re.compile(
+            rf"(?P<tok>{token_pattern})(?P<space>\s+)(?=[^\s,.!?，。！？])",
+            flags=re.IGNORECASE,
+        )
+        return pattern.sub(r"\g<tok>,\g<space>", text)
 
     def _build_instruct(self, cleaned_text: str, emotions: list[str]) -> str:
         parts: list[str] = []
@@ -225,6 +247,7 @@ class TTSEngine(TTSInterface):
 
     def _build_payload(self, text: str, model_name: str) -> dict[str, str]:
         cleaned_text, emotions = self._extract_emotion_markers(text)
+        cleaned_text = self._inject_micro_pause_after_interjections(cleaned_text)
         payload = {
             "model": model_name,
             "language": self.language,
