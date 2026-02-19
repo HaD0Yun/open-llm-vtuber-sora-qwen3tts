@@ -98,6 +98,10 @@ The Qwen3-TTS bridge runs locally at \`http://127.0.0.1:18117\` with the \`Qwen/
 > 
 > 이 프로젝트는 AI 응답을 생성하는 LLM 백엔드를 제공하지 않습니다. OpenAI API, Ollama, vLLM 등 **자신의 AI를 직접 준비하고 연결**해야 합니다.
 
+> **🎭 캐릭터 모델도 직접 준비하세요**
+> 
+> Live2D 캐릭터 모델 파일은 포함되어 있지 않습니다. [Booth.pm](https://booth.pm) 등에서 구매하거나 직접 제작한 모델을 넣어야 합니다.
+
 ```bash
 # 1. Clone this repository
 git clone https://github.com/HaD0Yun/open-llm-vtuber-sora-qwen3tts.git
@@ -106,12 +110,15 @@ cd open-llm-vtuber-sora-qwen3tts
 # 2. Install dependencies
 uv sync
 
-# 3. Set your own AI backend (LLM은 알아서 준비하세요)
+# 3. 캐릭터 모델 넣기 (직접 준비한 Live2D 모델을 live2d-models/ 에 복사)
+# 예: python3 scripts/import_march7_model.py "/path/to/March 7th"
+
+# 4. Set your own AI backend (LLM은 알아서 준비하세요)
 export LLM_BASE_URL="YOUR_LLM_URL"        # e.g., https://api.openai.com/v1
 export LLM_API_KEY="YOUR_API_KEY"         # Your OpenAI/Ollama/etc API key
 export QWEN_TTS_BASE_URL="YOUR_TTS_URL"   # Qwen3-TTS server URL
 
-# 4. Start
+# 5. Start
 bash scripts/start_sora_stack.sh
 ```
 
@@ -129,6 +136,30 @@ Sora is designed to be a warm, engaging companion with her own unique personalit
 - 🤗 **Supportive** — Offers encouragement and emotional support
 - 🎨 **Expressive** — Shows emotions through Live2D animations and voice tone
 - 🌟 **Attentive** — Remembers your conversations and builds rapport over time
+
+### 🚨 IMPORTANT: 캐릭터 모델은 직접 준비하세요
+
+> **⚠️ 이 프로젝트는 캐릭터 Live2D 모델 파일을 포함하지 않습니다!**
+>
+> Sora를 실행하려면 **직접 캐릭터 모델을 다운로드**해서 넣어야 합니다.
+
+**지원하는 캐릭터 모델:**
+- **March 7th** (붕괴: 스타레일) — 추천
+- 기타 Live2D 모델 (`.model3.json` 포맷)
+
+**모델 설치 방법:**
+```bash
+# March 7th 모델을 가지고 있다면:
+python3 scripts/import_march7_model.py "/path/to/March 7th"
+
+# 또는 직접 live2d-models/ 폴에 넣기:
+# live2d-models/your_character/your_character.model3.json
+```
+
+**모델 다운로드 출처:**
+- [Booth.pm](https://booth.pm) — 창작자들이 제작한 Live2D 모델
+- [nizima](https://nizima.com) — Live2D 공식 마켓플레이스
+- 기타 Live2D 에셋 사이트
 
 ### Default Configuration
 The default Sora configuration includes:
