@@ -41,9 +41,8 @@
 Whether you want a virtual companion, study partner, or just someone to talk to, Sora is there for you.
 
 ### 👀 Demo
-| ![](assets/i1.jpg) | ![](assets/i2.jpg) |
+| ![](assets/sora_demo_1.png) | ![](assets/sora_demo_2.png) |
 |:---:|:---:|
-| ![](assets/i3.jpg) | ![](assets/i4.jpg) |
 
 ---
 
